@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Engineering World — IBM Knowledge Map</title>
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- ════════════ Brython (Python-in-the-browser) ════════════
+       Loaded in <head> so the engine is ready before brython()
+       scans for the <script type="text/python"> runtime below. -->
+  <script src="https://cdn.jsdelivr.net/npm/brython@3.12/brython.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/brython@3.12/brython_stdlib.min.js"></script>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     SCREEN 1: WORLD MAP
+════════════════════════════════════════════════ -->
+<div id="screen-map" class="screen active">
+
+  <header class="map-header">
+    <div class="logo">⬡ AI.WORLD</div>
+    <div class="tagline">Navigate the AI Engineering Stack to unlock knowledge</div>
+    <div class="progress-bar-wrap">
+      <div id="world-progress" class="progress-bar"></div>
+    </div>
+  </header>
+
+  <div class="map-layout">
+
+    <!-- SVG World Map -->
+    <div class="map-canvas-wrap">
+      <svg id="world-map" viewBox="0 0 900 580" xmlns="http://www.w3.org/2000/svg">
+        <!-- Path lines between worlds -->
+        <g id="paths">
+          <line x1="140" y1="460" x2="280" y2="360" stroke="#334155" stroke-width="6" stroke-dasharray="12,6"/>
+          <line x1="280" y1="360" x2="440" y2="290" stroke="#334155" stroke-width="6" stroke-dasharray="12,6"/>
+          <line x1="440" y1="290" x2="610" y2="220" stroke="#334155" stroke-width="6" stroke-dasharray="12,6"/>
+          <line x1="610" y1="220" x2="760" y2="140" stroke="#334155" stroke-width="6" stroke-dasharray="12,6"/>
+        </g>
+
+        <!-- World nodes -->
+        <!-- World 1: Data Foundation -->
+        <g class="world-node" id="node-1" data-world="1">
+          <circle cx="140" cy="460" r="52" fill="#1e3a5f" stroke="#3b82f6" stroke-width="3"/>
+          <text x="140" y="453" text-anchor="middle" fill="#93c5fd" font-size="22">🏗️</text>
+          <text x="140" y="473" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">LAYER 1</text>
+          <text x="140" y="487" text-anchor="middle" fill="#64748b" font-size="9">Data Foundation</text>
+        </g>
+
+        <!-- World 2: Vector Ecosystem -->
+        <g class="world-node locked" id="node-2" data-world="2">
+          <circle cx="280" cy="360" r="52" fill="#1a1a2e" stroke="#6366f1" stroke-width="3"/>
+          <text x="280" y="353" text-anchor="middle" fill="#a5b4fc" font-size="22">🧠</text>
+          <text x="280" y="373" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">LAYER 2</text>
+          <text x="280" y="387" text-anchor="middle" fill="#64748b" font-size="9">Vector Ecosystem</text>
+        </g>
+
+        <!-- World 3: Algorithms -->
+        <g class="world-node locked" id="node-3" data-world="3">
+          <circle cx="440" cy="290" r="52" fill="#1a1a2e" stroke="#8b5cf6" stroke-width="3"/>
+          <text x="440" y="283" text-anchor="middle" fill="#c4b5fd" font-size="22">⚗️</text>
+          <text x="440" y="303" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">LAYER 3</text>
+          <text x="440" y="317" text-anchor="middle" fill="#64748b" font-size="9">Algorithms</text>
+        </g>
+
+        <!-- World 4: Generative AI -->
+        <g class="world-node locked" id="node-4" data-world="4">
+          <circle cx="610" cy="220" r="52" fill="#1a1a2e" stroke="#ec4899" stroke-width="3"/>
+          <text x="610" y="213" text-anchor="middle" fill="#f9a8d4" font-size="22">🤖</text>
+          <text x="610" y="233" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">LAYER 4</text>
+          <text x="610" y="247" text-anchor="middle" fill="#64748b" font-size="9">Generative AI</text>
+        </g>
+
+        <!-- World 5: LLMOps -->
+        <g class="world-node locked" id="node-5" data-world="5">
+          <circle cx="760" cy="140" r="52" fill="#1a1a2e" stroke="#f59e0b" stroke-width="3"/>
+          <text x="760" y="133" text-anchor="middle" fill="#fcd34d" font-size="22">🚀</text>
+          <text x="760" y="153" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">LAYER 5</text>
+          <text x="760" y="167" text-anchor="middle" fill="#64748b" font-size="9">LLMOps</text>
+        </g>
+
+        <!-- Karel agent -->
+        <g id="karel-agent">
+          <circle cx="140" cy="460" r="14" fill="#22d3ee" opacity="0.9"/>
+          <text x="140" y="465" text-anchor="middle" font-size="14">🤓</text>
+        </g>
+
+        <!-- Beepers layer -->
+        <g id="beepers-layer"></g>
+      </svg>
+    </div>
+
+    <!-- Python Terminal Panel -->
+    <div class="terminal-panel">
+      <div class="terminal-header">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+        <span class="terminal-title">Karel Python Console</span>
+      </div>
+
+      <div class="puzzle-info" id="puzzle-info">
+        <div class="puzzle-badge">PUZZLE <span id="puzzle-num">1</span> / 4</div>
+        <div class="puzzle-desc" id="puzzle-desc">Navigate Karel from World 1 to World 2.<br><strong>Task:</strong> Use <code>move()</code> 3 times to cross the path.</div>
+      </div>
+
+      <div class="code-area-wrap">
+        <textarea id="code-editor" class="code-editor" spellcheck="false" placeholder="# Write your Karel commands here
+# Available: move(), turn_left(), put_beeper(), pick_beeper()
+# Structures: for, while, if/else, def
+
+move()
+move()
+move()">move()
+move()
+move()</textarea>
+      </div>
+
+      <div class="terminal-actions">
+        <button id="btn-run" class="btn-run">▶ Run Code</button>
+        <button id="btn-reset" class="btn-reset">↺ Reset</button>
+        <button id="btn-hint" class="btn-hint">💡 Hint</button>
+      </div>
+
+      <div id="console-output" class="console-output">
+        <div class="console-line info">// Karel is ready. Write Python to navigate.</div>
+      </div>
+
+      <div class="unlock-banner hidden" id="unlock-banner">
+        <span>🔓</span> World unlocked! <button id="btn-enter-world" class="btn-enter">Enter Encyclopedia →</button>
+      </div>
+    </div>
+
+  </div><!-- end map-layout -->
+
+  <!-- Unlocked Worlds Dock -->
+  <div class="worlds-dock" id="worlds-dock">
+    <span class="dock-label">UNLOCKED:</span>
+    <!-- buttons injected by JS -->
+  </div>
+
+</div><!-- end screen-map -->
+
+
+<!-- ════════════════════════════════════════════════
+     SCREEN 2: ENCYCLOPEDIA
+════════════════════════════════════════════════ -->
+<div id="screen-encyclopedia" class="screen">
+
+  <div class="enc-topbar">
+    <button id="btn-back-map" class="btn-back">← Map</button>
+    <div id="enc-world-title" class="enc-world-title">Layer 1: Data Foundation</div>
+    <button id="btn-toggle-sidebar" class="btn-sidebar-toggle">☰ Topics</button>
+  </div>
+
+  <div class="enc-layout">
+
+    <!-- Left Sidebar (hidden by default) -->
+    <aside id="enc-sidebar" class="enc-sidebar collapsed">
+      <div class="sidebar-inner">
+        <div class="sidebar-header">Concepts</div>
+        <ul id="concept-list" class="concept-list">
+          <!-- populated by JS -->
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Right Content Panel -->
+    <main id="enc-content" class="enc-content">
+      <div id="concept-view" class="concept-view">
+        <div class="concept-placeholder">
+          <div class="placeholder-icon">📖</div>
+          <div class="placeholder-text">Select a concept from the sidebar to begin</div>
+          <button class="btn-open-sidebar" id="btn-open-sidebar-hint">Open Topics →</button>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+</div><!-- end screen-encyclopedia -->
+
+
+<!-- ════════════ PYTHON RUNTIME (executed by Brython) ════════════
+     Defines the Karel command vocabulary in real Python and exposes
+     window.runKarelCode(). It references window.KarelEngine, so it is
+     scanned/run by brython() only AFTER karel-engine.js has loaded. -->
+<script type="text/python" src="py/karel_runtime.py" id="karel-runtime"></script>
+
+<!-- ════════════ APPLICATION SCRIPTS ════════════
+     Load order matters:
+       1. encyclopedia-data.js  → window.ENCYCLOPEDIA / lookups
+       2. karel-engine.js       → window.KarelEngine / window.KarelPuzzles
+       3. visuals.js            → window.getVisual(key)
+       4. app.js                → wires UI, boots on DOMContentLoaded -->
+<script src="js/encyclopedia-data.js"></script>
+<script src="js/karel-engine.js"></script>
+<script src="js/visuals.js"></script>
+<script src="js/app.js"></script>
+
+<!-- ════════════ START BRYTHON ════════════
+     brython() scans for <script type="text/python"> tags and runs them.
+     Called after DOM is ready (and after engine JS above has executed),
+     so window.KarelEngine exists when the runtime initializes. -->
+<script>
+  window.addEventListener("DOMContentLoaded", function () {
+    // debug:1 surfaces Python tracebacks in the browser console.
+    brython({ debug: 1 });
+  });
+</script>
+
+</body>
+</html>
