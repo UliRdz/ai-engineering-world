@@ -5,12 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Engineering World — IBM Knowledge Map</title>
   <link rel="stylesheet" href="css/style.css" />
-
-  <!-- ════════════ Brython (Python-in-the-browser) ════════════
-       Loaded in <head> so the engine is ready before brython()
-       scans for the <script type="text/python"> runtime below. -->
-  <script src="https://cdn.jsdelivr.net/npm/brython@3.12/brython.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/brython@3.12/brython_stdlib.min.js"></script>
 </head>
 <body>
 
@@ -183,33 +177,19 @@ move()</textarea>
 </div><!-- end screen-encyclopedia -->
 
 
-<!-- ════════════ PYTHON RUNTIME (executed by Brython) ════════════
-     Defines the Karel command vocabulary in real Python and exposes
-     window.runKarelCode(). It references window.KarelEngine, so it is
-     scanned/run by brython() only AFTER karel-engine.js has loaded. -->
-<script type="text/python" src="py/karel_runtime.py" id="karel-runtime"></script>
-
 <!-- ════════════ APPLICATION SCRIPTS ════════════
      Load order matters:
-       1. encyclopedia-data.js  → window.ENCYCLOPEDIA / lookups
-       2. karel-engine.js       → window.KarelEngine / window.KarelPuzzles
-       3. visuals.js            → window.getVisual(key)
-       4. app.js                → wires UI, boots on DOMContentLoaded -->
+       1. python-interpreter.js → window.PyInterp (dependency-free, runs the
+          Karel command subset entirely in the browser — no CDN, no fetch)
+       2. encyclopedia-data.js  → window.ENCYCLOPEDIA / lookups
+       3. karel-engine.js       → window.KarelEngine / window.KarelPuzzles
+       4. visuals.js            → window.getVisual(key)
+       5. app.js                → wires UI, boots on DOMContentLoaded -->
+<script src="js/python-interpreter.js"></script>
 <script src="js/encyclopedia-data.js"></script>
 <script src="js/karel-engine.js"></script>
 <script src="js/visuals.js"></script>
 <script src="js/app.js"></script>
-
-<!-- ════════════ START BRYTHON ════════════
-     brython() scans for <script type="text/python"> tags and runs them.
-     Called after DOM is ready (and after engine JS above has executed),
-     so window.KarelEngine exists when the runtime initializes. -->
-<script>
-  window.addEventListener("DOMContentLoaded", function () {
-    // debug:1 surfaces Python tracebacks in the browser console.
-    brython({ debug: 1 });
-  });
-</script>
 
 </body>
 </html>
