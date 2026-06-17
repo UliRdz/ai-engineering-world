@@ -106,18 +106,45 @@
     $("unlock-banner").classList.add("hidden");
   }
 
+  /* ---------- Karel command vocabulary ----------
+   * These thin wrappers are injected into the interpreter as built-in
+   * functions. Each one ticks the engine's op-counter (infinite-loop guard) and delegates to
+   * the JS engine, which owns the grid state and records the animation. */
+  function karelBuiltins() {
+    const E = window.KarelEngine;
+    const guard = () => {
+      if (E.tick()) throw "Operation limit exceeded — possible infinite loop.";
+    };
+    return {
+      move() { guard(); if (!E.tryMove()) throw "Karel crashed: the path ahead is blocked."; },
+      turn_left() { guard(); E.turnLeft(); },
+      put_beeper() { guard(); E.putBeeper(); },
+      pick_beeper() { guard(); if (!E.pickBeeper()) throw "There is no beeper here to pick up."; },
+      front_is_clear() { return !!E.frontIsClear(); },
+      front_is_blocked() { return !E.frontIsClear(); },
+      beepers_present() { return !!E.beepersPresent(); },
+      no_beepers_present() { return !E.beepersPresent(); },
+      print() {
+        const msg = Array.prototype.map.call(arguments, String).join(" ");
+        E.logInfo(msg);
+      },
+    };
+  }
+
   /* ---------- terminal buttons ---------- */
   function runCode() {
-    if (!window.KarelPythonReady || typeof window.runKarelCode !== "function") {
-      window.KarelEngine.log("// Python runtime still loading — try again in a moment.", "warn");
+    if (!window.PyInterp || typeof window.PyInterp.run !== "function") {
+      window.KarelEngine.log("// Interpreter not loaded — check that js/python-interpreter.js is present.", "error");
       return;
     }
     hideUnlockBanner();
     window.KarelEngine.beginRun();
+    const code = (document.getElementById("code-editor") || {}).value || "";
     try {
-      window.runKarelCode();
+      window.PyInterp.run(code, karelBuiltins(), { maxSteps: 100000 });
     } catch (e) {
-      window.KarelEngine.crash(String(e));
+      // PyError (syntax / name errors) and Karel crashes (thrown strings)
+      window.KarelEngine.crash(e && e.message ? e.message : String(e));
     }
     window.KarelEngine.play(onRunComplete);
   }
